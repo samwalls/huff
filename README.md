@@ -1,0 +1,2 @@
+# Adaptive Huffman Coding Generator
+
