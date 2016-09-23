@@ -70,7 +70,7 @@ public:
         return true;
     }
 
-    //Returns a string representation of this node. Uses the result of the << stream operator.
+    //Returns a string representation of this node. Uses the result of the << stream operator on this node's element (of type T).
     std::string toString() {
         std::stringstream s;
         s << element;
