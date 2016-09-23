@@ -1,15 +1,18 @@
-#include "node.h"
+#include "Node.h"
+#include "NTree.h"
 #include <iostream>
 
 /*
  * Adaptive Huffman Coding Generator
  */
-
 int main() {
-    Node<int>* child1 = new Node<int>(1);
-    Node<int>* child2 = new Node<int>(3);
-    std::vector<Node<int>*> children = std::vector<Node<int>*> { child1, child2 };
-    Node<int>* myNode = new Node<int>(2, &children);
-    Node<int> tst = myNode[0];
-    printf("node layout: %i -> { %i, %i }", myNode->getElement(), myNode->child(0)->getElement(), myNode->child(1)->getElement());
+    NTree<int, 3>* tree = new NTree<int, 3>(5);
+    tree->getRoot()->addChild(1);
+    tree->getRoot()->addChild(2);
+    tree->getRoot()->addChild(3);
+    for (int i = 0; i < 3; i++) {
+        Node<int, 3>* child = tree->getRoot()->child(i);
+        std::cout << child->toString() << std::endl;
+    }
+    delete tree;
 }
