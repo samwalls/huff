@@ -11,15 +11,18 @@ template <typename T, unsigned short N> class Node {
 public:
 
     Node(T element, std::array<Node<T, N>*, N> children) {
-        this->element = element;
+        this->element = new T(element);
         this->children = children;
     }
 
     Node(T element) : Node(element, std::array<Node<T, N>*, N>()) {}
 
-    Node() {}
+    Node() {
+        this->element = nullptr;
+    }
 
     ~Node() {
+        delete element;
         if (N > 0) {
             // destruct all children, leaf-first, recursively
             for (Node<T, N>* child : children)
@@ -27,15 +30,17 @@ public:
         }
     }
 
+    //Get this node's element.
     T getElement() {
-        return this->element;
+        return *(this->element);
     }
 
+    //Get the ith child in this node's child list.
     Node<T, N>* child(int i) {
         return children[i];
     }
 
-    //the total number of currently populated children
+    //The total number of currently populated children.
     unsigned int numChildren() {
         unsigned int total = 0;
         for (int i = 0; i < N; i++) {
@@ -45,42 +50,30 @@ public:
         return total;
     }
 
-    //Append a child to this node's child list, will return false if the number of children is already at or above the template argument N.
-    bool addChild(Node<T, N>* child) {
-        for (int i = 0; i < N; i++) {
-            //look for empty child slots
-            if (children[i] == nullptr) {
-                children[i] = child;
-                return true;
-            }
-        }
-        return false;
-    }
-
-    //Append a child to this node's child list, will return false if the number of children is already at or above the template argument N.
-    bool addChild(T element) {
-        return addChild(new Node(element));
-    }
-
     //Set the ith child in this node's child list to the passed node object. Returns false if i is equal to or more than the template argument N.
-    bool setChild(const int i, Node<T, N>* child) {
+    bool setChild(const short i, Node<T, N>* child) {
         if (i < 0 || i >= N)
             return false;
         children[i] = child;
         return true;
     }
 
+    //Set the ith child in this node's child list to a new instance of a node with the passed element value.
+    bool setChild(const short i, T element) {
+        return setChild(i, new Node(element));
+    }
+
     //Returns a string representation of this node. Uses the result of the << stream operator on this node's element (of type T).
     std::string toString() {
         std::stringstream s;
-        s << element;
+        s << *element;
         return s.str();
     }
 
 private:
     //array of size N, containing pointers to child nodes, null pointer represents a non-existent child
     std::array<Node<T, N>*, N> children;
-    T element;
+    T* element;
 };
 
 #endif //NODE_H
