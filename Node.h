@@ -35,6 +35,10 @@ public:
         return *(this->element);
     }
 
+    std::array<Node<T, N>*, N> getChildren() {
+        return children;
+    }
+
     //Get the ith child in this node's child list.
     Node<T, N>* child(int i) {
         return children[i];

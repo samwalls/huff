@@ -17,7 +17,7 @@ public:
         delete root;
     }
 
-    virtual Node<T, N>* getRoot() {
+    Node<T, N>* getRoot() {
         return root;
     }
 
