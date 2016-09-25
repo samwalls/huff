@@ -2,24 +2,19 @@
 #define HUFFMAN_CODING_H
 
 #include "Probable.h"
-using namespace std;
 
 template<typename T> class HuffmanCoding {
 public:
-    HuffmanCoding(vector<Probable<T>> source) {
+    HuffmanCoding(std::vector<Probable<T>> source) {
         this.source = source;
     }
 
-    ~HuffmanCoding() {
-        delete source;
-        delete code;
-        delete coding;
-    }
+    ~HuffmanCoding() {}
 private:
-    vector<Probable<T>>* source;
-    vector<T>* code;
+    std::vector<Probable<T>> source;
+    std::vector<T> code;
     //a map of source objects (with probability values) to output object
-    map<Probable<T>, T>* coding;
+    std::map<Probable<T>, T> coding;
 };
 
 #endif //HUFFMAN_CODING_H
