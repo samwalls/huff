@@ -10,19 +10,16 @@
 template <typename T, unsigned short N> class Node {
 public:
 
-    Node(T element, std::array<Node<T, N>*, N> children) {
-        this->element = new T(element);
+    Node(T& element, std::array<Node<T, N>*, N> children) {
+        this->element = element;
         this->children = children;
     }
 
-    Node(T element) : Node(element, std::array<Node<T, N>*, N>()) {}
+    Node(T& element) : Node(element, std::array<Node<T, N>*, N>()) {}
 
-    Node() {
-        this->element = nullptr;
-    }
+    Node() : Node(T()) {}
 
     ~Node() {
-        delete element;
         if (N > 0) {
             // destruct all children, leaf-first, recursively
             for (Node<T, N>* child : children)
@@ -32,7 +29,7 @@ public:
 
     //Get this node's element.
     T getElement() {
-        return *(this->element);
+        return this->element;
     }
 
     std::array<Node<T, N>*, N> getChildren() {
@@ -70,14 +67,14 @@ public:
     //Returns a string representation of this node. Uses the result of the << stream operator on this node's element (of type T).
     std::string toString() {
         std::stringstream s;
-        s << *element;
+        s << element;
         return s.str();
     }
 
 private:
     //array of size N, containing pointers to child nodes, null pointer represents a non-existent child
     std::array<Node<T, N>*, N> children;
-    T* element;
+    T element;
 };
 
 #endif //NODE_H
