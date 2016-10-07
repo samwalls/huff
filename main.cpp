@@ -19,10 +19,10 @@ static bool HELP = false, DECOMPRESS = false;
 
 static const std::string USAGE =
         "USAGE: huff [--puff] [-h|--help] <input-file> <output-file>\n"
-        "\t<input-file>  the file treated as input\n"
-        "\t<output-file> the file treated as output\n"
-        "\t--puff        Tells huff to decompress the input file. Huff will compress files by default.\n"
-        "\t-h|--help     Print this usage screen.";
+        "<input-file>   the file treated as input\n"
+        "<output-file>  the file treated as output (will overwrite if already exists)\n"
+        "--puff         Tells huff to decompress the input file. Huff will compress files by default.\n"
+        "-h|--help      Print this usage screen.";
 
 // parse command line arguments and react to them
 static void parseArgs(int argc, char* argv[]);
@@ -71,7 +71,7 @@ static void parseArgs(int argc, char* argv[]) {
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
         //set variables accordingly
-        if (arg == "-h" || arg == "--h")
+        if (arg == "-h" || arg == "--help")
             HELP = true;
         else if (arg == "--puff")
             DECOMPRESS = true;
