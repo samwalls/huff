@@ -3,5 +3,5 @@ project(data_encoding_p01)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(SOURCE_FILES main.cpp Node.h NTree.h Probable.h HuffmanCoding.h)
-add_executable(data_encoding_p01 ${SOURCE_FILES})
+set(SOURCE_FILES main.cpp Node.hpp HuffmanTree.hpp NodeData.hpp FGKTree.hpp BitWriter.hpp HuffmanEncoder.hpp HuffmanCoder.hpp HuffmanDecoder.hpp Optional.hpp BitReader.hpp)
+add_executable(huff ${SOURCE_FILES})
