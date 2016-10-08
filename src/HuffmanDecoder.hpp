@@ -59,8 +59,8 @@ public:
 
     //place the decoded data into the output bit-buffer
     void decode() {
-        while (reader.nextBufferGood()){
-            Node<NodeData<T>, 2>* node = &tree.getRoot();
+        while (reader.nextBufferGood()) {
+            Node<NodeData<T>, 2> *node = &tree.getRoot();
             T decoded = 0;
             //if not a leaf traverse down using the read bit as the path until we get to a leaf
             while (!node->isLeaf()) {
@@ -69,14 +69,16 @@ public:
                 else
                     node = node->child(0);
             }
-            if (node == tree.getNYTNode())
+            if (node == tree.getNYTNode()) {
                 decoded = decodeNYT();
-            else {
+            } else {
                 decoded = node->getElement().value.value();
             }
             output.template write<T>(decoded);
             tree.update(decoded);
         }
+        readRemaining();
+        //std::cout << "DEBUG: there was " << (reader.getCurrentBit() ? std::to_string(reader.BITS - reader.getCurrentBit() - 1) + " bits" : "nothing") << " left in the buffer";
     }
 
 protected:
@@ -90,6 +92,27 @@ protected:
         else
             p += HUFF_REMAINDER;
         return p;
+    }
+
+    void readRemaining() {
+        int remaining = reader.BITS - reader.getCurrentBit();
+        Node<NodeData<T>, 2> *node = &tree.getRoot();
+        while (remaining > 0) {
+            //read a bit
+            bool bit = reader.read() != 0;
+            if (!node->isLeaf())
+                node = node->child(bit);
+            else if (node == tree.getNYTNode()) {
+                //the nyt must return at this point because there is no possible way to output enough bits to fill another T
+                return;
+            }
+            //if after reading, the node is a leaf...
+            if (node->isLeaf()) {
+                output.template write<T>(node->getElement().value.value());
+                node = &tree.getRoot();
+            }
+            remaining--;
+        }
     }
 
 private:
