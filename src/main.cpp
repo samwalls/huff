@@ -26,7 +26,7 @@ static const std::string USAGE =
         "<output-file>  the file treated as output (will overwrite if already exists)\n"
         "--puff         Tells huff to decompress the input file. Huff will compress files by default.\n"
         "-h|--help      Print this usage screen.\n"
-        "-r|--report    Produce a report at the end, detailing the level of compression achieved, most common symbols etc..";
+        "-r|--report    Produce a report at the end, detailing the level of compression achieved, most common symbol etc..";
 
 // parse command line arguments and react to them
 static void parseArgs(int argc, char* argv[]);
@@ -120,31 +120,27 @@ static void reportCompression(std::string inputFile, std::string outputFile, Huf
     long inputSize = getFileSize(inputFile);
     long outputSize = getFileSize(outputFile);
     unsigned char mostCommonSymbol = 0;
-    unsigned char leastCommonSymbol = 0;
 
     unsigned long maxI = 0, minI = 0;
     auto indices = finalTree.getIndices();
     for (auto pair : finalTree.getIndices()) {
         auto node = pair.first;
-        if (node->isLeaf() && node != finalTree.getNYTNode()) {
-            if (indices[node] > maxI) {
-                maxI = indices[node];
-                mostCommonSymbol = node->getElement().value.value();
-            } if (indices[node] < minI) {
-                minI = indices[node];
-                leastCommonSymbol = node->getElement().value.value();
-            }
+        if (node->isLeaf() && node != finalTree.getNYTNode() && indices[node] > maxI) {
+            maxI = indices[node];
+            mostCommonSymbol = node->getElement().value.value();
         }
     }
 
-    double ratio = round(100 * (DECOMPRESS ? (double)inputSize / (double)outputSize : (double)outputSize / (double)inputSize)) / 100;
+    double ratio;
+    if (inputSize <= 0 || outputSize <= 0)
+        ratio = -1;
+    else
+        ratio = round(100 * (DECOMPRESS ? (double)inputSize / (double)outputSize : (double)outputSize / (double)inputSize)) / 100;
     std::cout << "input file size    : " << (inputSize != -1 ? std::to_string(inputSize) : "failed to determine size") << (DECOMPRESS ? " (compressed)" : "") << "\n";
     std::cout << "output file size   : " << (outputSize != -1 ? std::to_string(outputSize) : "failed to determine size") << (DECOMPRESS ? "" : " (compressed)") << "\n";
-    std::cout << "compression ratio  : " << ratio << "\n";
+    std::cout << "compression ratio  : " << (ratio == -1 ? "could not determine ratio" : std::to_string(ratio)) << "\n";
     std::cout << "final node count   : " << indices.size() << "\n";
     std::cout << "most common symbol : " << std::hex << "0x" << +mostCommonSymbol << " \"" << mostCommonSymbol << "\"" << "\n";
-    if (mostCommonSymbol != leastCommonSymbol)
-        std::cout << "least common symbol: " << std::hex << "0x" << +leastCommonSymbol << " \"" << leastCommonSymbol << "\"" << "\n";
 }
 
 static long getFileSize(std::string file) {
