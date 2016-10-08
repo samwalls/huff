@@ -105,18 +105,14 @@ static void reportCompression(std::string uncompressed, std::string compressed, 
 
 static int encode(std::ifstream& input, std::ofstream& output, HuffmanTree<unsigned char>& tree) {
     std::cout << "compressing..." << std::endl;
-    HuffmanEncoder<unsigned char> encoder = HuffmanEncoder<unsigned char>(input, tree);
-    //continually peek the character ahead, then encode
-    // peek() will cause good() to return false if the EOF is reached for instance
-    while (input.peek(), input.good())
-        encoder.encode();
-    encoder.flush();
-    //release the encoder's stream to the output
+    HuffmanEncoder<unsigned char> encoder = HuffmanEncoder<unsigned char>(input, output, tree);
     if (!output.good()) {
         std::cerr << "failed to find / write to " << OUTPUT << std::endl;
         return 1;
     } else {
-        encoder.release(output);
+        // peek() will cause good() to return false if the EOF is reached for instance
+        if (input.peek(), input.good())
+            encoder.encode();
         std::cout << "compressed " << INPUT << " into " << OUTPUT << std::endl;
         return 0;
     }
@@ -134,7 +130,7 @@ static int decode(std::ifstream& input, std::ofstream& output, HuffmanTree<unsig
         return 1;
     } else {
         //decode everything
-        decoder.decodeAll();
+        decoder.decode();
         std::cout << "decompressed " << INPUT << " into " << OUTPUT << std::endl;
         return 0;
     }

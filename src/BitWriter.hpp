@@ -27,9 +27,8 @@ public:
             buffer |= (1 << BITS - current_bit - 1);
         if (++current_bit == BITS) {
             //write output once a full buffer-size's worth of information is ready
-            //write out in bytes because otherwise the stream operator [gets confused and] tries to to_string the value
-            char* o = reinterpret_cast<char*>(&buffer);
-            output.write(o,sizeof(T_BUFFER));
+            //write out in bytes because otherwise the stream operator [gets confused and] tries to to_string the value if it is not a char
+            output.write(reinterpret_cast<char*>(&buffer),sizeof(T_BUFFER));
             reset();
             /*
             //Debug Code: print bits out
@@ -43,7 +42,6 @@ public:
     //write all bits in the value to the buffer
     template<typename T>
     void write(T value) {
-        //output.write(reinterpret_cast<char*>(&value), sizeof(T));
         int t_bits = sizeof(T) * CHAR_BIT;
         for (int i = 0; i < t_bits; i++)
             writeBit((1 << CHAR_BIT - i - 1) & value);
@@ -53,6 +51,14 @@ public:
     void flush() {
         while (current_bit)
             writeBit(0);
+    }
+
+    bool good() {
+        return output.good();
+    }
+
+    int getCurrentBit() {
+        return current_bit;
     }
 
 private:

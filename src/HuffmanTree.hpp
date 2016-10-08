@@ -69,6 +69,33 @@ public:
         return 0;
     }
 
+    long outputPathUntilBufferFull(Node<NodeData<T>, 2>* node, BitWriter<T>& output) {
+        if (node != nullptr) {
+            Node<NodeData<T>, 2>* parent = node->getParent();
+            int n = 0;
+            std::stack<char> path = std::stack<char>();
+            while (parent != nullptr) {
+                //going up the tree, store a bit representing which path to take if the tree was being traversed downwards
+                if (node == parent->child(0))
+                    path.push(0);
+                else if (node == parent->child(1))
+                    path.push(1);
+                n++;
+                //set the node to the parent, and the parent to the next parent up the hierarchy
+                node = parent;
+                parent = node->getParent();
+            }
+            //output the path itself
+            std::stack<char> pathCopy = std::stack<char>(path);
+            for (std::stack<char> pathCopy = std::stack<char>(path); !pathCopy.empty() && output.getCurrentBit(); pathCopy = std::stack<char>(path)) {
+                output.writeBit(path.top());
+                path.pop();
+            }
+            return n;
+        }
+        return 0;
+    }
+
     //get the NYT node, returns null if the indices list has no non-null elements
     Node<NodeData<T>, 2>* getNYTNode() {
         Node<NodeData<T>, 2>* nyt = nullptr;

@@ -55,16 +55,11 @@ public:
     static const unsigned long HUFF_REMAINDER = HUFF_SIZE - (1 << HUFF_EPSILON);
 
     //The implementation of HuffmanTree determines the update rule
-    HuffmanDecoder(std::istream& input, std::ostream& output, HuffmanTree<T>& tree) : HuffmanCoder<T>(input, output, tree), reader(input) {
-        streamCounter = 0;
-    }
+    HuffmanDecoder(std::istream& input, std::ostream& output, HuffmanTree<T>& tree) : HuffmanCoder<T>(input, output, tree), reader(input) {}
 
     //place the decoded data into the output bit-buffer
-    void decodeAll() {
-        //read the length value from the start of the stream, determines the number of bits to read
-        unsigned long streamSize = (unsigned long) reader.template read<long>();
-        streamCounter += sizeof(long) * CHAR_BIT;
-        while (streamCounter < streamSize){
+    void decode() {
+        while (reader.nextBufferGood()){
             Node<NodeData<T>, 2>* node = &tree.getRoot();
             T decoded = 0;
             //if not a leaf traverse down using the read bit as the path until we get to a leaf
@@ -73,12 +68,10 @@ public:
                     node = node->child(1);
                 else
                     node = node->child(0);
-                streamCounter++;
             }
             if (node == tree.getNYTNode())
                 decoded = decodeNYT();
             else {
-                assert(node->getElement().value.exists());
                 decoded = node->getElement().value.value();
             }
             output.template write<T>(decoded);
@@ -92,18 +85,15 @@ protected:
         //read 'e' bits into p
         T p = 0;
         reader.read(HUFF_EPSILON, p);
-        streamCounter += HUFF_EPSILON;
-        if (p < HUFF_REMAINDER) {
+        if (p < HUFF_REMAINDER)
             reader.read(1, HUFF_EPSILON, p);
-            streamCounter++;
-        } else
+        else
             p += HUFF_REMAINDER;
         return p;
     }
 
 private:
     BitReader<T> reader;
-    unsigned long streamCounter;
 };
 
 #endif //DATA_ENCODING_P01_HUFFMANDECODER_HPP

@@ -58,6 +58,17 @@ public:
             c |= (read() << BITS - ((i + j) % BITS) - 1);
     }
 
+    //returns true if the input stream is in a good state to get a new buffer from the input
+    bool nextBufferGood() {
+        //peek at the input stream, then tell if it is good or not
+        //todo this likely only works for a single char
+        return input.peek(), input.good();
+    }
+
+    int getCurrentBit() {
+        return current_bit;
+    }
+
 private:
     std::istream& input;
     int current_bit;
