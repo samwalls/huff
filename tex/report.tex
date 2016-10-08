@@ -1,0 +1,72 @@
+\documentclass[]{article}
+\usepackage{times}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{listings}
+\usepackage[round]{natbib}
+\lstset{
+  basicstyle=\fontfamily{lmvtt}\selectfont\small,
+  columns=fullflexible,
+}
+
+%opening
+\title{CS3302 Data Encoding - Adaptive Huffman Coding}
+\author{ID: 150013828}
+
+\begin{document}
+
+\maketitle
+
+\section{Overview}
+In this practical task we are asked to implement Adaptive Huffman coding, and experiment / evaluate the results. The implementation presented is based heavily on that of \citet{Sayood06}. Presented are also a set of tests on various file / data types as well as a discussion about how well the implementation performs.
+
+\section{Design and Implementation}
+I chose to use \emph{C++} to implement the algorithm, and hence I tend to use OOP (loosely) to model the algorithm. Although we see common use of template types in my design, due to complications I have only verified that the classes work (BitReader and BitWriter in particular) for type 'unsigned char' only. My intended use of the template type was to define BitReaders and BitWriters operate on sizes larger than a byte, to see if this affects the compression (I assume it will greatly effect it).
+\paragraph{Node$\langle$T, N$\rangle$} I started by designing a Node class (Node.hpp) as I felt this would be needed in any case. The nodes in question can have any number of children but invariably, due to C++'s template system, a node is only allowed to have children that can have the same number as it can itself. This effectively defines an n-ary tree, but of course, for adaptive Huffman coding we use N as 2 to make a binary tree.
+\paragraph{HuffmanTree$\langle$T$\rangle$} The HuffmanTree class contains the root node of the tree, as well as defining other common methods that we need to operate on the tree: \emph{getNTYNode}, \emph{getRoot}, \emph{outputPath}, \emph{findWeightGroup} etc..
+\paragraph{NodeData$\langle$T$\rangle$ and Optional$\langle$T$\rangle$} The use of NodeData is mainly just to stop the type signatures of nodes from looking absolutely awful. All nodes in the HuffmanTree class are of type NodeData$\langle$T$\rangle$. NodeData itself is just a struct containing an Optional$\langle$T$\rangle$ as well as a weight value which we need when implementing the algorithm.
+
+Optional is used as a safety guard in this case. In adaptive Huffman coding, only leaf nodes have symbol values associated with them, and hence I use Optional as a non-nullable type in the NodeData struct, we can just check the Optional's \emph{exists} method to check whether or not the value exists, or we should use it. This way, we minimise the amount of dynamic memory allocations in the tree.
+\paragraph{HuffmanCoder$\langle$T$\rangle$} Is the base class to HuffmanEncoder and HuffmanDecoder; containing the common structures that both of them need, in particular: a constructor that uses an input stream and and output stream; and the reference to a HuffmanTree.
+\paragraph{BitReader$\langle$T$\rangle$ and BitWriter$\langle$T$\rangle$} In order to get a stream of bits, rather than bytes, we abstract over bytes using a bit-buffer. These bit-buffers in particular read in chunks with a size defined by the size of \emph{T}, and feed out/in individual bits. So the use case in the current main file, is as an \emph{unsigned char}, so the buffer size is only a byte in this case.
+\paragraph{Particular issues} I had significant issues once I had implemented the algorithm and discovered that the padding around the last byte is a big problem. I.e. when the encoded message does not fit neatly into a multiple of 8 bits, we need to consider: what the encoder should fill those empty places with; and how the decoder should interpret this. Ultimately an issue of making the decoder \emph{stop}!
+
+Initially, to fix the problem, I made it so the encoder would keep a hold of its output stream. Then, in usage, one would call \emph{release} and provide an output stream as the argument. The encoder would then put the length of the stream in bits at the start, and then subsequently pass the rest of its own internal stream to the output stream specified. As great as it might have seemed, this would take away the algorithm's property of \emph{memoryless-ness} - which is one of the key advantages over static Huffman coding algorithms.
+\\\\
+The solution I found was to just repeatedly output the path to the NYT node as many times as needed to fill any remaining bit places in the output bit-buffer. From the decoder's perspective, it can then read until the input stream reports \emph{EOF}. Then, any remaining bits in the input bit-buffer can either: be decoded as paths to one or more leafs; or if the NYT path happens to be read it can just stop, as there is no possible way of identifying a new symbol after that - it would require at least one buffer's-worth of bits to define.
+\section{Building and Running}
+To build the project I use \emph{cmake}. In the project's root directory, run:
+\begin{lstlisting}[language=bash]
+cmake . && make
+\end{lstlisting}
+This will generate the executable \emph{huff}. Usage is defined in the file 'README.md', or by running :
+\begin{lstlisting}
+./huff -h
+\end{lstlisting}
+The program is always run by specifying an input file, and the desired output name. If the output file already exists it will be \emph{overwritten}.
+\paragraph{Tests} To run the tests, simply run:
+\begin{lstlisting}
+./test.sh
+\end{lstlisting}
+Or, to run a specific set of tests, you could run:
+\begin{lstlisting}
+./testset <location-of-tests> <file-type>
+\end{lstlisting}
+For example:
+\begin{lstlisting}
+./testset img bmp
+\end{lstlisting}
+Runs the canonical test for the compressor over all BMP files in the img directory.
+\\\\
+I should warn though, compression/decompression of larger, more complex images in the 'img' directory can take upwards of two minutes each.
+\section{Results and Discussion}
+\paragraph{Analysis of the implementation} In order to analyse the compression performance, and to a certain extent the time performance of this Huffman coding algorithm (and to help test correctness in general) I created a series of tests including various file types, sizes, levels of complexity etc..
+\paragraph{The \emph{FGK} adaptive Huffman coding algorithm}
+\section{Evaluation and Conclusion}
+\paragraph{Evaluation}
+\paragraph{Conclusion}
+\bibliography{ref}
+\bibliographystyle{apalike} 
+\end{document}
