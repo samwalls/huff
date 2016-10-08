@@ -135,7 +135,7 @@ static void reportCompression(std::string inputFile, std::string outputFile, Huf
     if (inputSize <= 0 || outputSize <= 0)
         ratio = -1;
     else
-        ratio = round(100 * (DECOMPRESS ? (double)inputSize / (double)outputSize : (double)outputSize / (double)inputSize)) / 100;
+        ratio = (double)1 - round(100 * (DECOMPRESS ? (double)inputSize / (double)outputSize : (double)outputSize / (double)inputSize)) / 100;
     std::cout << "input file size    : " << (inputSize != -1 ? std::to_string(inputSize) : "failed to determine size") << (DECOMPRESS ? " (compressed)" : "") << "\n";
     std::cout << "output file size   : " << (outputSize != -1 ? std::to_string(outputSize) : "failed to determine size") << (DECOMPRESS ? "" : " (compressed)") << "\n";
     std::cout << "compression ratio  : " << (ratio == -1 ? "could not determine ratio" : std::to_string(ratio)) << "\n";
