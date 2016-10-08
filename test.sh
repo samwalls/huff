@@ -1,3 +1,3 @@
 ./testset.sh tar tar
 ./testset.sh txt txt
-./testset.sh img img
+./testset.sh img bmp
