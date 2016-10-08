@@ -13,3 +13,5 @@ huff
 */*.log
 */decoded/
 */encoded/
+*.bbl
+*.aux
