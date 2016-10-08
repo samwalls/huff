@@ -15,3 +15,7 @@ huff
 */encoded/
 *.bbl
 *.aux
+*.pdf
+*.blg
+*.dvi
+*.synctex.gz
