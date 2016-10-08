@@ -3,7 +3,7 @@
 RES=$1
 TYPE=$2
 
-echo "Running BMP tests... (might take a while)"
+echo "Running $TYPE tests from $RES"
 mkdir -p "${RES}/decoded"
 mkdir -p "${RES}/encoded"
 
