@@ -16,4 +16,5 @@ huff [--puff] [-h|--help] <input-file> <output-file>
 <output-file>   the file treated as output (will be overwritten if already exists)
 --puff          Tells huff to decompress the input file. Huff will compress files by default.
 -h|--help       Print this usage message.
+-r|--report     Produce a report at the end, detailing the level of compression achieved, most common symbol etc..
 ```
