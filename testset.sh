@@ -38,4 +38,4 @@ do
 	fi
 done
 
-echo -e "$OUT" > "${RES}/test_log.txt"
+echo -e "$OUT" > "${RES}/test.log"

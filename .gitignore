@@ -10,6 +10,6 @@ CTestTestfile.cmake
 data_encoding_p01
 huff
 
-*/*_log.txt
+*/*.log
 */decoded/
 */encoded/
