@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <cmath>
 #include "FGKTree.hpp"
 #include "HuffmanEncoder.hpp"
 #include "HuffmanDecoder.hpp"
@@ -11,18 +12,21 @@
  * 7/10/2016
  */
 
+
+
 /*--- CONSTANTS, VARIABLES & DECLARATIONS ---*/
 
+
+
 static std::string INPUT = "", OUTPUT = "";
-
-static bool HELP = false, DECOMPRESS = false;
-
+static bool HELP = false, DECOMPRESS = false, REPORT = false;
 static const std::string USAGE =
         "USAGE: huff [--puff] [-h|--help] <input-file> <output-file>\n"
         "<input-file>   the file treated as input\n"
         "<output-file>  the file treated as output (will overwrite if already exists)\n"
         "--puff         Tells huff to decompress the input file. Huff will compress files by default.\n"
-        "-h|--help      Print this usage screen.";
+        "-h|--help      Print this usage screen.\n"
+        "-r|--report    Produce a report at the end, detailing the level of compression achieved, most common symbols etc..";
 
 // parse command line arguments and react to them
 static void parseArgs(int argc, char* argv[]);
@@ -30,13 +34,20 @@ static void parseArgs(int argc, char* argv[]);
 // create a report on how much compression has been reached, as well as some information about the final code-tree
 static void reportCompression(std::string uncompressed, std::string compressed, HuffmanTree<unsigned char>& finalTree);
 
+//return the file size in bytes
+static long getFileSize(std::string file);
+
 // encodes the input file, outputting to the output file
 static int encode(std::ifstream& input, std::ofstream& output, HuffmanTree<unsigned char>& tree);
 
 // decodes the input file, outputting to the output file
 static int decode(std::ifstream& input, std::ofstream& output, HuffmanTree<unsigned char>& tree);
 
+
+
 /*--- MAIN METHOD --- */
+
+
 
 int main(int argc, char* argv[]) {
     parseArgs(argc, argv);
@@ -55,16 +66,20 @@ int main(int argc, char* argv[]) {
     int exitCode = 0;
     if (DECOMPRESS)
         exitCode = decode(input, output, tree);
-    else {
+    else
         exitCode = encode(input, output, tree);
-        reportCompression(INPUT, OUTPUT, tree);
-    }
     input.close();
     output.close();
+    if (REPORT)
+        reportCompression(INPUT, OUTPUT, tree);
     return exitCode;
 }
 
+
+
 /*--- METHOD IMPLEMENTATIONS ---*/
+
+
 
 static void parseArgs(int argc, char* argv[]) {
     //read each argument except argv[0]
@@ -75,6 +90,8 @@ static void parseArgs(int argc, char* argv[]) {
             HELP = true;
         else if (arg == "--puff")
             DECOMPRESS = true;
+        else if (arg == "-r" || arg == "--report")
+            REPORT = true;
         else if (INPUT.empty() || INPUT.length() == 0)
             INPUT = arg;
         else if (OUTPUT.empty() || OUTPUT.length() == 0)
@@ -98,9 +115,44 @@ static void parseArgs(int argc, char* argv[]) {
     }
 }
 
-static void reportCompression(std::string uncompressed, std::string compressed, HuffmanTree<unsigned char>& finalTree) {
+static void reportCompression(std::string inputFile, std::string outputFile, HuffmanTree<unsigned char>& finalTree) {
     //provide report about the level of compression and the tree
-    unsigned long nodeCount = finalTree.getIndices().size();
+    long inputSize = getFileSize(inputFile);
+    long outputSize = getFileSize(outputFile);
+    unsigned char mostCommonSymbol = 0;
+    unsigned char leastCommonSymbol = 0;
+
+    unsigned long maxI = 0, minI = 0;
+    auto indices = finalTree.getIndices();
+    for (auto pair : finalTree.getIndices()) {
+        auto node = pair.first;
+        if (node->isLeaf() && node != finalTree.getNYTNode()) {
+            if (indices[node] > maxI) {
+                maxI = indices[node];
+                mostCommonSymbol = node->getElement().value.value();
+            } if (indices[node] < minI) {
+                minI = indices[node];
+                leastCommonSymbol = node->getElement().value.value();
+            }
+        }
+    }
+
+    double ratio = round(100 * (DECOMPRESS ? (double)inputSize / (double)outputSize : (double)outputSize / (double)inputSize)) / 100;
+    std::cout << "input file size    : " << (inputSize != -1 ? std::to_string(inputSize) : "failed to determine size") << (DECOMPRESS ? " (compressed)" : "") << "\n";
+    std::cout << "output file size   : " << (outputSize != -1 ? std::to_string(outputSize) : "failed to determine size") << (DECOMPRESS ? "" : " (compressed)") << "\n";
+    std::cout << "compression ratio  : " << ratio << "\n";
+    std::cout << "final node count   : " << indices.size() << "\n";
+    std::cout << "most common symbol : " << std::hex << "0x" << +mostCommonSymbol << " \"" << mostCommonSymbol << "\"" << "\n";
+    if (mostCommonSymbol != leastCommonSymbol)
+        std::cout << "least common symbol: " << std::hex << "0x" << +leastCommonSymbol << " \"" << leastCommonSymbol << "\"" << "\n";
+}
+
+static long getFileSize(std::string file) {
+    std::ifstream f;
+    f.open(file, std::ifstream::ate | std::ifstream::binary);
+    auto size = f.tellg();
+    f.close();
+    return size;
 }
 
 static int encode(std::ifstream& input, std::ofstream& output, HuffmanTree<unsigned char>& tree) {
