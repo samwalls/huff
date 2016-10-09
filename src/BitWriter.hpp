@@ -27,15 +27,8 @@ public:
             buffer |= (1 << BITS - current_bit - 1);
         if (++current_bit == BITS) {
             //write output once a full buffer-size's worth of information is ready
-            //write out in bytes because otherwise the stream operator [gets confused and] tries to to_string the value if it is not a char
             output.write(reinterpret_cast<char*>(&buffer),sizeof(T_BUFFER));
             reset();
-            /*
-            //Debug Code: print bits out
-            for (int i = 0; i < BITS; i++)
-                std::cout << std::noskipws << (std::to_string(((1 << BITS - i - 1) & buffer) >> BITS - i - 1));
-            std::cout << std::noskipws << " ";
-            */
         }
     }
 
@@ -53,10 +46,12 @@ public:
             writeBit(0);
     }
 
+    //return true if the output stream says so
     bool good() {
         return output.good();
     }
 
+    //return the current bit (zero based) in the buffer
     int getCurrentBit() {
         return current_bit;
     }

@@ -27,6 +27,7 @@ public:
     //update the tree, defined by implementation class
     virtual void update(T c) = 0;
 
+    //return a reference to the root of the tree
     Node<NodeData<T>, 2>& getRoot() {
         return root;
     }
@@ -69,6 +70,7 @@ public:
         return 0;
     }
 
+    //output the path of the passed node, so long as the BitWriter has internal buffer space.
     long outputPathUntilBufferFull(Node<NodeData<T>, 2>* node, BitWriter<T>& output) {
         if (node != nullptr) {
             Node<NodeData<T>, 2>* parent = node->getParent();
@@ -110,10 +112,12 @@ public:
         return nyt;
     }
 
+    //search for leaves by predicate
     Node<NodeData<T>, 2>* findLeaf(std::function<bool(NodeData<T>)> predicate) {
         return root.findLeaf(predicate);
     }
 
+    //search for leaves by symbol
     Node<NodeData<T>, 2>* findLeaf(T symbol) {
         //find a leaf such that it's value exists and equals symbol
         return findLeaf([symbol](NodeData<T> data) {
@@ -121,10 +125,12 @@ public:
         });
     }
 
+    //reset the whole tree back to the initial root node
     void reset() {
         root = makeNYT();
     }
 
+    //return the indices map
     std::map<Node<NodeData<T>, 2>*, unsigned long> getIndices() {
         return indices;
     }
@@ -133,6 +139,7 @@ protected:
     Node<NodeData<T>, 2> root;
     std::map<Node<NodeData<T>, 2>*, unsigned long> indices;
 
+    //make an NYT node, with the weight set to 0 and the optional set to non-existent
     static Node<NodeData<T>, 2> makeNYT() {
         NodeData<T> data = NodeData<T> { 0, Optional<T>() };
         return Node<NodeData<T>, 2>(data);
@@ -145,6 +152,8 @@ protected:
         });
     }
 
+    //return the maximum number of nodes that the alphabet, defined by T, can produce in the code tree
+    //i.e. 2 * <size of alphabet> - 1;
     unsigned long getMaxNodes() {
         return maxNodes;
     }

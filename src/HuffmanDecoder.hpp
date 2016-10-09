@@ -78,7 +78,6 @@ public:
             tree.update(decoded);
         }
         readRemaining();
-        //std::cout << "DEBUG: there was " << (reader.getCurrentBit() ? std::to_string(reader.BITS - reader.getCurrentBit() - 1) + " bits" : "nothing") << " left in the buffer";
     }
 
 protected:
@@ -94,6 +93,7 @@ protected:
         return p;
     }
 
+    //read, and interpret until the reader's buffer is empty (if it wasn't already)
     void readRemaining() {
         int remaining = reader.BITS - reader.getCurrentBit();
         Node<NodeData<T>, 2> *node = &tree.getRoot();

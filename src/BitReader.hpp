@@ -19,14 +19,6 @@ public:
     int read() {
         if (current_bit == 0) {
             //read into the buffer if the bit counter has just started
-            //we would use reinterpret_cast here to convert into bytes, but reinterpret_cast orders the bytes backwards..
-            /*
-            for (int i = 0; i < sizeof(T_BUFFER); i++) {
-                char byte = 0;
-                input >> std::noskipws >> byte;
-                buffer |= (((T_BUFFER)byte) << CHAR_BIT * (sizeof(T_BUFFER) - i - 1));
-            }
-            */
             input.read(reinterpret_cast<char*>(&buffer), sizeof(T_BUFFER));
         }
         //get the value for a particular bit
@@ -65,6 +57,7 @@ public:
         return input.peek(), input.good();
     }
 
+    //return the current bit (zero based) in the buffer
     int getCurrentBit() {
         return current_bit;
     }
