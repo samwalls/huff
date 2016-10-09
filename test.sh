@@ -1,5 +1,7 @@
 N=$1
 
+mkdir -p logs
+
 for i in `seq 1 $N`;
 do
 	echo "running test sequence ${i}"
